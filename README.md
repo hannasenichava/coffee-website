@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Quarta — форма заявок
 
-## Getting Started
+## Что входит
 
-First, run the development server:
+- `components/LeadForm.tsx` — форма с именем, белорусским телефоном, типом обращения и комментарием.
+- `components/LeadForm.css` — стили формы.
+- `app/api/lead/route.ts` — обработчик `POST /api/lead`.
+- SQLite хранит заявки в `data/leads.sqlite`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Установка в проект Next.js
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Скопируйте `components/LeadForm.tsx` и `components/LeadForm.css` в папку `components` вашего проекта.
+2. Скопируйте `app/api/lead/route.ts` в `app/api/lead/route.ts`. Если проект использует `src/app`, положите файл в `src/app/api/lead/route.ts`.
+3. В терминале VS Code, находясь в папке проекта, выполните:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```powershell
+   npm.cmd install better-sqlite3
+   npm.cmd install -D @types/better-sqlite3
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. В файле страницы, где должна появиться форма (например, `app/page.tsx`), импортируйте компонент:
 
-## Learn More
+   ```tsx
+   import LeadForm from "@/components/LeadForm";
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+   И вставьте `<LeadForm />` внутрь JSX в нужном месте. Например:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```tsx
+   <section id="order">
+     <h2>Закажем ваш следующий любимый кофе?</h2>
+     <LeadForm />
+   </section>
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   Если алиас `@/` в вашем проекте не работает, используйте относительный импорт, например `../components/LeadForm` — путь зависит от расположения `page.tsx`.
 
-## Deploy on Vercel
+5. Перезапустите сервер разработки: в терминале нажмите `Ctrl+C`, затем выполните `npm.cmd run dev`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Проверка
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Корректный пример телефона: `+375 29 123-45-67`.
+- Также принимаются `8029 123-45-67` и национальный вариант из 9 цифр, например `29 123-45-67`.
+- Повторная заявка с того же нормализованного номера в пределах 10 минут получает HTTP 409 и понятное сообщение. Серверная транзакция защищает от параллельных запросов при двойном нажатии; кнопка также блокируется на время отправки.
+- При ошибке сети или сервера форма показывает сообщение, а введённые данные остаются в полях.
+- Источники рекламы сохраняются из UTM-параметров: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` (или `ad_id`), `utm_term`; также сохраняются `yclid`, `gclid`, `fbclid`, URL страницы и referrer.
+
+Пример рекламной ссылки:
+
+`https://example.com/?utm_source=yandex&utm_medium=cpc&utm_campaign=coffee_october&utm_content=ad_02&utm_term=coffee`
+
+## Почему SQLite
+
+SQLite — небольшая встроенная база данных: не нужен отдельный сервер базы, данные сохраняются в одном файле, а проверка повторов и запись выполняются транзакционно. Это удобно для локального прототипа и небольшого сайта на одном постоянно работающем сервере.
+
+**Важно для публикации:** не используйте локальный SQLite-файл на бессерверных платформах или хостинге с эфемерной файловой системой (например, типичный serverless deployment): файл может не сохраняться между запусками или не быть общим для разных экземпляров. Для production используйте управляемую PostgreSQL/другую постоянную БД и настройте резервное копирование. Сам файл `data/leads.sqlite` содержит персональные данные — не добавляйте его в Git и ограничьте доступ к нему.
+
+## Защита данных
+
+Форма собирает имя и телефон для ответа на заявку. Добавьте на сайте полноценную политику обработки персональных данных и используйте форму только после настройки хранения, доступа, срока удаления и правового основания обработки данных.

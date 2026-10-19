@@ -1,0 +1,4 @@
+# Add these lines to your project's .gitignore:
+/data/*.sqlite
+/data/*.sqlite-shm
+/data/*.sqlite-wal
