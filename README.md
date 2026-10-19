@@ -1,60 +1,77 @@
-# Quarta — форма заявок
+# Quarta Coffee Website
 
-## Что входит
+## 🇷🇺 О проекте
 
-- `components/LeadForm.tsx` — форма с именем, номеров телефона, типом обращения и комментарием.
-- `components/LeadForm.css` — стили формы.
-- `app/api/lead/route.ts` — обработчик `POST /api/lead`.
-- SQLite хранит заявки в `data/leads.sqlite`.
+Quarta — лендинг бренда по обжарке кофе, созданный на Next.js и размещённый на Netlify. Форма заявок подключена к Supabase, а уведомления о новых заявках отправляются в Telegram. Обе интеграции протестированы: заявки сохраняются в базе данных, уведомления приходят в Telegram.
 
-## Установка в проект Next.js
+### Возможности
+- Адаптивный дизайн для мобильных устройств и компьютеров.
+- Форма заявок с серверной обработкой.
+- Supabase (PostgreSQL) для хранения заявок.
+- Telegram Bot API для уведомлений о новых заявках.
+- Отслеживание рекламных источников через UTM-параметры.
 
-1. Скопируйте `components/LeadForm.tsx` и `components/LeadForm.css` в папку `components` вашего проекта.
-2. Скопируйте `app/api/lead/route.ts` в `app/api/lead/route.ts`. Если проект использует `src/app`, положите файл в `src/app/api/lead/route.ts`.
-3. В терминале VS Code, находясь в папке проекта, выполните:
+### Технологии
+Next.js, React, TypeScript, CSS, Supabase, Telegram Bot API, Netlify.
 
-   ```powershell
-   npm.cmd install better-sqlite3
-   npm.cmd install -D @types/better-sqlite3
-   ```
+### Переменные окружения
 
-4. В файле страницы, где должна появиться форма (например, `app/page.tsx`), импортируйте компонент:
+Настроены в Netlify:
 
-   ```tsx
-   import LeadForm from "@/components/LeadForm";
-   ```
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
 
-   И вставьте `<LeadForm />` внутрь JSX в нужном месте. Например:
+Секретные ключи и токены хранятся в переменных окружения и не должны публиковаться в GitHub или использоваться в клиентском коде.
 
-   ```tsx
-   <section id="order">
-     <h2>Закажем ваш следующий любимый кофе?</h2>
-     <LeadForm />
-   </section>
-   ```
+### Использование ИИ
 
-   Если алиас `@/` в вашем проекте не работает, используйте относительный импорт, например `../components/LeadForm` — путь зависит от расположения `page.tsx`.
+Я использовала ИИ как помощника при написании и редактировании кода, устранении ошибок интеграции и подготовке документации. Я принимала решения по проекту, проверяла предложенные изменения, настраивала развёртывание и тестировала функциональность.
 
-5. Перезапустите сервер разработки: в терминале нажмите `Ctrl+C`, затем выполните `npm.cmd run dev`.
+При подключении Supabase возникла ошибка `PGRST205`: API не находил таблицу `public.leads` в кэше схемы. Я проверила базу в SQL Editor, убедилась, что таблица существует, и обновила кэш схемы. После этого форма начала принимать заявки. Этот случай показал важность проверки рекомендаций ИИ по реальным логам и результатам тестирования.
 
-## Проверка
+В дальнейшем я бы провела аудит Lighthouse, улучшила доступность и мобильную производительность и добавила автоматизированные тесты.
 
-- Корректный пример телефона: `+375 29 123-45-67`.
-- Также принимаются `8029 123-45-67` и национальный вариант из 9 цифр, например `29 123-45-67`.
-- Повторная заявка с того же нормализованного номера в пределах 10 минут получает HTTP 409 и понятное сообщение. Серверная транзакция защищает от параллельных запросов при двойном нажатии; кнопка также блокируется на время отправки.
-- При ошибке сети или сервера форма показывает сообщение, а введённые данные остаются в полях.
-- Источники рекламы сохраняются из UTM-параметров: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` (или `ad_id`), `utm_term`; также сохраняются `yclid`, `gclid`, `fbclid`, URL страницы и referrer.
+### Конфиденциальность
 
-Пример рекламной ссылки:
+Перед использованием сайта в production необходимо обеспечить информирование пользователей об обработке персональных данных, контроль доступа и подходящие сроки хранения и удаления заявок.
 
-`https://example.com/?utm_source=yandex&utm_medium=cpc&utm_campaign=coffee_october&utm_content=ad_02&utm_term=coffee`
+---
 
-## Почему SQLite
+## 🇬🇧 About the Project
 
-SQLite — небольшая встроенная база данных: не нужен отдельный сервер базы, данные сохраняются в одном файле, а проверка повторов и запись выполняются транзакционно. Это удобно для локального прототипа и небольшого сайта на одном постоянно работающем сервере.
+Quarta is a landing page for a coffee-roasting brand, built with Next.js and deployed on Netlify. The lead form is connected to Supabase, and new-lead notifications are sent to Telegram. Both integrations have been tested: submissions are stored in the database and notifications arrive in Telegram.
 
-**Важно для публикации:** не используйте локальный SQLite-файл на бессерверных платформах или хостинге с эфемерной файловой системой (например, типичный serverless deployment): файл может не сохраняться между запусками или не быть общим для разных экземпляров. Для production используйте управляемую PostgreSQL/другую постоянную БД и настройте резервное копирование. Сам файл `data/leads.sqlite` содержит персональные данные — не добавляйте его в Git и ограничьте доступ к нему.
+### Features
+- Responsive design for mobile and desktop.
+- Server-processed customer inquiry form.
+- Supabase (PostgreSQL) for lead storage.
+- Telegram Bot API for new-lead notifications.
+- UTM tracking to identify marketing sources.
 
-## Защита данных
+### Tech Stack
+Next.js, React, TypeScript, CSS, Supabase, Telegram Bot API, Netlify.
 
-Форма собирает имя и телефон для ответа на заявку. Добавьте на сайте полноценную политику обработки персональных данных и используйте форму только после настройки хранения, доступа, срока удаления и правового основания обработки данных.
+### Environment Variables
+
+The following variables are configured in Netlify:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+Keep actual credentials in secret environment variables. Never publish them on GitHub or expose them in client-side code.
+
+### AI-Assisted Development
+
+I used AI as a coding assistant to write and revise code, troubleshoot integration issues, and prepare documentation. I made project decisions, reviewed suggestions, configured deployment, and tested the functionality.
+
+During the Supabase integration, the API returned a `PGRST205` error because the `public.leads` table could not be found in the schema cache. I investigated the database in the SQL Editor, verified that the table existed, and refreshed the schema cache. The form subsequently accepted submissions. This highlighted the importance of validating AI-generated suggestions against actual logs and test results.
+
+With more time, I would run a Lighthouse audit, improve accessibility and mobile performance, and add automated tests.
+
+### Privacy
+
+Before production use, appropriate privacy information, access controls, and data-retention and deletion rules should be in place.
