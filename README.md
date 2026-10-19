@@ -2,7 +2,7 @@
 
 ## Что входит
 
-- `components/LeadForm.tsx` — форма с именем, белорусским телефоном, типом обращения и комментарием.
+- `components/LeadForm.tsx` — форма с именем, номеров телефона, типом обращения и комментарием.
 - `components/LeadForm.css` — стили формы.
 - `app/api/lead/route.ts` — обработчик `POST /api/lead`.
 - SQLite хранит заявки в `data/leads.sqlite`.
